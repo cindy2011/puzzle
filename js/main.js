@@ -36,12 +36,35 @@ $(function() {
                 if (f.className == 'itemCell') {
                     _thatL = f.style.left;
                     _thatT = f.style.top;
+                    var Topflag=0,Leftflag=0;
                     if ((_thatL == _thisL) || (_thatT == _thisT)) {
-                        $(f).css({ 'left': _thisL, 'top': _thisT });
-                        $('.itemCell').eq(_thisNum).css({ 'left': _thatL, 'top': _thatT });
-                        if (checked(newObj.posArr, newObj.ops)) {
-                            alert('拼图成功！');
-                        };
+                        if(_thatL==_thisL){
+                             var new_thatT=_thatT.replace(/rem/, "");
+                             var new_thisT=_thisT.replace(/rem/, "");
+                             //console.log(new_thatT+","+new_thisT);
+                            if(Math.abs(new_thatT-new_thisT)==2){
+                                  Topflag=1;
+                            }else{
+                                alert('少年，步伐太快了！');
+                            }
+                        }
+                         if(_thatT==_thisT){
+                             var new_thatL=_thatL.replace(/rem/, "");
+                             var new_thisL=_thisL.replace(/rem/, "");
+                            if(Math.abs(new_thatL-new_thisL)==2){
+                                  Leftflag=1;
+                            }else{
+                                alert('少年，步伐太快了！');
+                            }
+                        }
+                        if(Topflag||Leftflag){
+                               $(f).css({ 'left': _thisL, 'top': _thisT });
+                            $('.itemCell').eq(_thisNum).css({ 'left': _thatL, 'top': _thatT });
+                            if (checked(newObj.posArr, newObj.ops)) {
+                                alert('拼图成功！');
+                            };  
+                        }
+                        
                     } else {
                         alert('不支持斜滑');
                     }
@@ -76,13 +99,13 @@ function PosA() {
 
 function init() {
     var ops = [
-        ['0px', '0px'],
-        ['2rem', '0px'],
-        ['4rem', '0px'],
-        ['0px', '2rem'],
+        ['0rem', '0rem'],
+        ['2rem', '0rem'],
+        ['4rem', '0rem'],
+        ['0rem', '2rem'],
         ['2rem', '2rem'],
         ['4rem', '2rem'],
-        ['0px', '4rem'],
+        ['0rem', '4rem'],
         ['2rem', '4rem'],
         ['4rem', '4rem']
     ];
