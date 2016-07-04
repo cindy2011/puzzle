@@ -1,44 +1,58 @@
 $(function() {
-   init();
-   
-   $('.itemCell').each(function() {
-       var obj=$(this)[0]; 
-       var touchStartX = 0;
-       var touchStartY = 0; 
-       var targetElement={};
-       obj.addEventListener("touchstart", function(t){
-              var r,n;
-              r = t.targetTouches[0];
-              n = t.target;
-              targetElement = n;
-              touchStartX = r.pageX;
-              touchStartY = r.pageY;
-       }, !1);
-       obj.addEventListener("touchmove", function(t){
-           var e = t.changedTouches[0],
-             n = 50;
-           return Math.abs(e.pageX - this.touchStartX) > n || Math.abs(e.pageY - this.touchStartY) > n ? !0 : !1;
-       }, !1);
-       obj.addEventListener("touchend",function(t){
-             
-              var e = t.changedTouches[0],f = document.elementFromPoint(e.pageX - t.pageXOffset, l.pageY - e.pageYOffset);
-           
-             n = 50;
-           var res=Math.abs(e.pageX - this.touchStartX) > n || Math.abs(e.pageY - this.touchStartY) > n ? !0 : !1;     
-           var newNode=t.targetTouches[0];
-           var left= newNode.style.left;
-           var top=newNode.style.top;
-           console.log(left+','+top);
-           // t.target.style.left=targetElement.style.left;
-           // t.target.style.top=targetElement.style.top;
-           // targetElement.style.left=left;
-           // targetElement.style.top=top;
-       } , !1);
-       obj.addEventListener("touchcancel", function(){
-         targetElement = null;        
-       }, !1);
-   });
-    
+    var newObj = init();
+
+    $('.itemCell').each(function() {
+        var _this = $(this);
+        var obj = $(this)[0];
+        var touchStartX = 0;
+        var touchStartY = 0;
+        var _thisT = '',
+            _thisL = '',
+            _thisNum = 0;
+        var _thatT = '',
+            _thatL = '';
+        var flag = 0;
+        obj.addEventListener("touchstart", function(t) {
+            var r, n;
+            r = t.targetTouches[0];
+            n = t.target;
+            touchStartX = r.pageX;
+            touchStartY = r.pageY;
+            _thisT = _this[0].style.top;
+            _thisL = _this[0].style.left;
+            _thisNum = _this.index();
+            t.preventDefault();
+        }, !1);
+        obj.addEventListener("touchmove", function(t) {
+            var e = t.changedTouches[0],
+                n = $('.itemCell').eq(0).width() / 2;
+            flag = Math.abs(e.pageX - touchStartX) > n || Math.abs(e.pageY - touchStartY) > n ? !0 : !1;
+        }, !1);
+        obj.addEventListener("touchend", function(t) {
+            if (flag) {
+                var e = t.changedTouches[0],
+                    l = window;
+                f = document.elementFromPoint(e.pageX - l.pageXOffset, e.pageY - l.pageYOffset);
+                if (f.className == 'itemCell') {
+                    _thatL = f.style.left;
+                    _thatT = f.style.top;
+                    if ((_thatL == _thisL) || (_thatT == _thisT)) {
+                        $(f).css({ 'left': _thisL, 'top': _thisT });
+                        $('.itemCell').eq(_thisNum).css({ 'left': _thatL, 'top': _thatT });
+                        if (checked(newObj.posArr, newObj.ops)) {
+                            alert('拼图成功！');
+                        };
+                    } else {
+                        alert('不支持斜滑');
+                    }
+                }
+            }
+        }, !1);
+        obj.addEventListener("touchcancel", function() {
+            targetElement = null;
+        }, !1);
+    });
+
 });
 
 function PosA() {
@@ -62,43 +76,56 @@ function PosA() {
 
 function init() {
     var ops = [
-        [0, 0],
-        ['1rem', 0],
-        ['2rem', 0],
-        ['0', '1rem'],
-        ['1rem', '1rem'],
-        ['2rem', '1rem'],
-        ['0', '2rem'],
-        ['1rem', '2rem'],
-        ['2rem', '2rem']
+        ['0px', '0px'],
+        ['2rem', '0px'],
+        ['4rem', '0px'],
+        ['0px', '2rem'],
+        ['2rem', '2rem'],
+        ['4rem', '2rem'],
+        ['0px', '4rem'],
+        ['2rem', '4rem'],
+        ['4rem', '4rem']
     ];
     var posArr = PosA();
     $('.itemCell').each(function() {
         $(this).css({ 'left': ops[posArr[$(this).index()]][0], 'top': ops[posArr[$(this).index()]][1] });
     });
+    return { ops: ops, posArr: posArr };
 }
-    function dropItem() {
-        this.touchStartX = 0;
-        this.touchStartY = 0;       
+
+function checked(posArr, ops) {
+    var flag = 1;
+    for (var i = 1; i <= posArr.length; i++) {
+        var newNode = document.getElementById('node' + i);
+        if ((newNode.style.left != (ops[i - 1][0])) || (newNode.style.top != (ops[i - 1][1]))) {
+            flag = 0;
+        }
     }
-    dropItem.prototype.onTouchStart = function(t) {
-        var n;
-        r = t.targetTouches[0];
-        n = t.target;
-        this.targetElement = n;
-        this.touchStartX = r.pageX;
-        this.touchStartY = r.pageY;
-        console.log(this.touchStartY + ',' + this.touchStartX);
-    };
-    dropItem.prototype.onTouchMove = function(t) {
-           var e = t.changedTouches[0],
-             n = 50;
-           return Math.abs(e.pageX - this.touchStartX) > n || Math.abs(e.pageY - this.touchStartY) > n ? !0 : !1;
-    };
-    dropItem.prototype.onTouchEnd = function(t) {          
-           var res=this.onTouchMove(t);
-           console.log(res);
-    };
-    dropItem.prototype.onTouchCancel = function() {
-        this.targetElement = null;
-    };
+    return flag;
+
+}
+// function dropItem() {
+//     this.touchStartX = 0;
+//     this.touchStartY = 0;
+// }
+// dropItem.prototype.onTouchStart = function(t) {
+//     var n;
+//     r = t.targetTouches[0];
+//     n = t.target;
+//     this.targetElement = n;
+//     this.touchStartX = r.pageX;
+//     this.touchStartY = r.pageY;
+//     console.log(this.touchStartY + ',' + this.touchStartX);
+// };
+// dropItem.prototype.onTouchMove = function(t) {
+//     var e = t.changedTouches[0],
+//         n = 50;
+//     return Math.abs(e.pageX - this.touchStartX) > n || Math.abs(e.pageY - this.touchStartY) > n ? !0 : !1;
+// };
+// dropItem.prototype.onTouchEnd = function(t) {
+//     var res = this.onTouchMove(t);
+//     console.log(res);
+// };
+// dropItem.prototype.onTouchCancel = function() {
+//     this.targetElement = null;
+// };
